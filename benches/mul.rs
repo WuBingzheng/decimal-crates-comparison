@@ -107,32 +107,68 @@ fn bench_fastnum(group: &mut BenchmarkGroup<'_, WallTime>, sample: usize) {
 
 // crate: primitive_fixed_point_decimal
 fn bench_primitive_fixed_point_decimal(group: &mut BenchmarkGroup<'_, WallTime>, sample: usize) {
-    use primitive_fixed_point_decimal::OobScaleFpdec;
-    type Dec128 = OobScaleFpdec<i128>;
-    type Dec64 = OobScaleFpdec<i64>;
+    use primitive_fixed_point_decimal::{ConstScaleFpdec, OobScaleFpdec};
+
+    // ConstScaleFpdec
+    type Const128 = ConstScaleFpdec<i128, 18>;
+    type Const64 = ConstScaleFpdec<i64, 8>;
+
+    // 28 * 2 - 18 <= 38
+    for iexp in (0..=28).step_by(sample) {
+        let man = 10_i128.pow(iexp);
+
+        let a = Const128::from_mantissa(man);
+
+        group.bench_with_input(
+            BenchmarkId::new("prim-const-fpdec:128", iexp),
+            &(a, a),
+            |b, i| b.iter(|| black_box(i.0 * i.1)),
+        );
+    }
+
+    // x * 2 - 8 <= 19
+    for iexp in (0..=13).step_by(sample) {
+        let man = 10_i64.pow(iexp);
+
+        let a = Const64::from_mantissa(man);
+
+        group.bench_with_input(
+            BenchmarkId::new("prim-const-fpdec:64", iexp),
+            &(a, a),
+            |b, i| b.iter(|| black_box(i.0 * i.1)),
+        );
+    }
+
+    // OobScaleFpdec
+    type Oob128 = OobScaleFpdec<i128>;
+    type Oob64 = OobScaleFpdec<i64>;
 
     for iexp in (0..=38).step_by(sample) {
         let man = 10_i128.pow(iexp);
 
-        let a = Dec128::from_mantissa(man);
+        let a = Oob128::from_mantissa(man);
 
         let diff_scale = (iexp as i32 * 2 - 38).max(0);
 
-        group.bench_with_input(BenchmarkId::new("prim-fpdec:128", iexp), &(a, a), |b, i| {
-            b.iter(|| black_box(i.0.checked_mul(i.1, diff_scale)))
-        });
+        group.bench_with_input(
+            BenchmarkId::new("prim-oob-fpdec:128", iexp),
+            &(a, a),
+            |b, i| b.iter(|| black_box(i.0.checked_mul(i.1, diff_scale))),
+        );
     }
 
     for iexp in (0..=19).step_by(sample) {
         let man = 10_i64.pow(iexp);
 
-        let a = Dec64::from_mantissa(man);
+        let a = Oob64::from_mantissa(man);
 
         let diff_scale = (iexp as i32 * 2 - 19).max(0);
 
-        group.bench_with_input(BenchmarkId::new("prim-fpdec:64", iexp), &(a, a), |b, i| {
-            b.iter(|| black_box(i.0.checked_mul(i.1, diff_scale)))
-        });
+        group.bench_with_input(
+            BenchmarkId::new("prim-oob-fpdec:64", iexp),
+            &(a, a),
+            |b, i| b.iter(|| black_box(i.0.checked_mul(i.1, diff_scale))),
+        );
     }
 }
 
