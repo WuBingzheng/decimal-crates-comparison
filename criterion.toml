@@ -9,4 +9,8 @@ comparison_colors = [
     {r = 92, g = 145, b = 206}, # blue   
     {r = 245, g = 220, b = 110},# yellow
     {r = 158, g = 122, b = 170},# purple
+    {r = 156, g = 102, b = 68}, # brown
+    {r = 232, g = 140, b = 170},# pink
+    {r = 64,  g = 105, b = 170},# deep blue
+    {r = 102, g = 186, b = 84}, # grass green
 ]

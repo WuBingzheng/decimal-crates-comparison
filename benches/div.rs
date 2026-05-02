@@ -173,17 +173,17 @@ fn criterion_benchmark(c: &mut Criterion) {
 
     let mut group = c.benchmark_group(format!("division:evenly{machine}"));
     bench_bigdecimal(&mut group, sample, false);
-    bench_rust_decimal(&mut group, sample, false);
     bench_fastnum(&mut group, sample, false);
+    bench_rust_decimal(&mut group, sample, false);
     bench_decimax(&mut group, sample, false);
     bench_primitive_fixed_point_decimal(&mut group, sample, false);
     bench_f64(&mut group, sample, false);
     group.finish();
 
     let mut group = c.benchmark_group(format!("division:non-evenly{machine}"));
-    bench_bigdecimal(&mut group, sample, true);
-    bench_rust_decimal(&mut group, sample, true);
+    // bench_bigdecimal(&mut group, sample, true);
     bench_fastnum(&mut group, sample, true);
+    bench_rust_decimal(&mut group, sample, true);
     bench_decimax(&mut group, sample, true);
     bench_primitive_fixed_point_decimal(&mut group, sample, true);
     bench_f64(&mut group, sample, true);

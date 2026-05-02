@@ -59,14 +59,14 @@ fn bench_decimax(group: &mut BenchmarkGroup<'_, WallTime>, sample: usize) {
         let a = Dec128::from_parts(man, iexp.min(31));
 
         group.bench_with_input(BenchmarkId::new("decimax:128", iexp), &(a, a), |b, i| {
-            b.iter(|| black_box(i.0 + i.1))
+            b.iter(|| black_box(i.0 * i.1))
         });
     }
 
     for iexp in (0..=17).step_by(sample) {
         let man = 10_i64.pow(iexp);
 
-        let a = Dec64::from_parts(man, iexp.min(31));
+        let a = Dec64::from_parts(man, iexp.min(15));
 
         group.bench_with_input(BenchmarkId::new("decimax:64", iexp), &(a, a), |b, i| {
             b.iter(|| black_box(i.0 * i.1))
@@ -144,9 +144,9 @@ fn criterion_benchmark(c: &mut Criterion) {
         .unwrap_or(1);
 
     let mut group = c.benchmark_group(format!("mulplication{machine}"));
-    bench_bigdecimal(&mut group, sample);
+    // bench_bigdecimal(&mut group, sample);
+    // bench_fastnum(&mut group, sample);
     bench_rust_decimal(&mut group, sample);
-    bench_fastnum(&mut group, sample);
     bench_decimax(&mut group, sample);
     bench_primitive_fixed_point_decimal(&mut group, sample);
     bench_f64(&mut group, sample);
