@@ -152,7 +152,7 @@ fn criterion_benchmark(c: &mut Criterion) {
         .unwrap_or(1);
 
     let mut group = c.benchmark_group(format!("addition:pure{machine}"));
-    // bench_bigdecimal(&mut group, sample, false);
+    bench_bigdecimal(&mut group, sample, false);
     bench_rust_decimal(&mut group, sample, false);
     bench_fastnum(&mut group, sample, false);
     bench_decimax(&mut group, sample, false);
@@ -161,7 +161,7 @@ fn criterion_benchmark(c: &mut Criterion) {
     group.finish();
 
     let mut group = c.benchmark_group(format!("addition:rescale{machine}"));
-    // bench_bigdecimal(&mut group, sample, true);
+    bench_bigdecimal(&mut group, sample, true);
     bench_rust_decimal(&mut group, sample, true);
     bench_fastnum(&mut group, sample, true);
     bench_decimax(&mut group, sample, true);

@@ -134,8 +134,8 @@ fn bench_primitive_fixed_point_decimal(
     extra: bool,
 ) {
     use primitive_fixed_point_decimal::ConstScaleFpdec;
-    type Dec128 = ConstScaleFpdec<i128, 10>;
-    type Dec64 = ConstScaleFpdec<i64, 10>;
+    type Dec128 = ConstScaleFpdec<i128, 8>;
+    type Dec64 = ConstScaleFpdec<i64, 8>;
 
     let d_man = 10_i128.pow(8);
     let d = Dec128::from_mantissa(d_man + extra as i128);
