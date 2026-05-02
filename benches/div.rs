@@ -5,6 +5,21 @@ use std::env;
 use std::hint::black_box;
 use std::str::FromStr;
 
+// primitive f64
+fn bench_f64(group: &mut BenchmarkGroup<'_, WallTime>, sample: usize, extra: bool) {
+    let d = 10_f64.powi(8) + extra as u8 as f64;
+
+    for iexp in (0..=36).step_by(sample) {
+        let man = 10_i128.pow(iexp);
+
+        let n = man as f64;
+
+        group.bench_with_input(BenchmarkId::new("f64", iexp), &(n, d), |b, i| {
+            b.iter(|| black_box(i.0 / i.1))
+        });
+    }
+}
+
 // crate: rust_decimal
 fn bench_rust_decimal(group: &mut BenchmarkGroup<'_, WallTime>, sample: usize, extra: bool) {
     use rust_decimal::prelude::Decimal;
@@ -162,6 +177,7 @@ fn criterion_benchmark(c: &mut Criterion) {
     bench_fastnum(&mut group, sample, false);
     bench_decimax(&mut group, sample, false);
     bench_primitive_fixed_point_decimal(&mut group, sample, false);
+    bench_f64(&mut group, sample, false);
     group.finish();
 
     let mut group = c.benchmark_group(format!("division:non-evenly{machine}"));
@@ -170,6 +186,7 @@ fn criterion_benchmark(c: &mut Criterion) {
     bench_fastnum(&mut group, sample, true);
     bench_decimax(&mut group, sample, true);
     bench_primitive_fixed_point_decimal(&mut group, sample, true);
+    bench_f64(&mut group, sample, true);
     group.finish();
 }
 

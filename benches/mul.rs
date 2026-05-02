@@ -5,6 +5,19 @@ use std::env;
 use std::hint::black_box;
 use std::str::FromStr;
 
+// primitive f64
+fn bench_f64(group: &mut BenchmarkGroup<'_, WallTime>, sample: usize) {
+    for iexp in (0..=36).step_by(sample) {
+        let man = 10_i128.pow(iexp);
+
+        let a = man as f64;
+
+        group.bench_with_input(BenchmarkId::new("f64", iexp), &(a, a), |b, i| {
+            b.iter(|| black_box(i.0 * i.1))
+        });
+    }
+}
+
 // crate: rust_decimal
 fn bench_rust_decimal(group: &mut BenchmarkGroup<'_, WallTime>, sample: usize) {
     use rust_decimal::prelude::Decimal;
@@ -41,7 +54,7 @@ fn bench_decimax(group: &mut BenchmarkGroup<'_, WallTime>, sample: usize) {
     use decimax::{Dec64, Dec128};
 
     for iexp in (0..=36).step_by(sample) {
-        let man = 10_i128.pow(iexp);
+        let man = 10_i128.pow(iexp.min(31));
 
         let a = Dec128::from_parts(man, iexp);
 
@@ -53,7 +66,7 @@ fn bench_decimax(group: &mut BenchmarkGroup<'_, WallTime>, sample: usize) {
     for iexp in (0..=17).step_by(sample) {
         let man = 10_i64.pow(iexp);
 
-        let a = Dec64::from_parts(man, iexp);
+        let a = Dec64::from_parts(man, iexp.min(31));
 
         group.bench_with_input(BenchmarkId::new("decimax:64", iexp), &(a, a), |b, i| {
             b.iter(|| black_box(i.0 * i.1))
@@ -136,6 +149,7 @@ fn criterion_benchmark(c: &mut Criterion) {
     bench_fastnum(&mut group, sample);
     bench_decimax(&mut group, sample);
     bench_primitive_fixed_point_decimal(&mut group, sample);
+    bench_f64(&mut group, sample);
     group.finish();
 }
 
