@@ -54,9 +54,9 @@ fn bench_decimax(group: &mut BenchmarkGroup<'_, WallTime>, sample: usize) {
     use decimax::{Dec64, Dec128};
 
     for iexp in (0..=36).step_by(sample) {
-        let man = 10_i128.pow(iexp.min(31));
+        let man = 10_i128.pow(iexp);
 
-        let a = Dec128::from_parts(man, iexp);
+        let a = Dec128::from_parts(man, iexp.min(31));
 
         group.bench_with_input(BenchmarkId::new("decimax:128", iexp), &(a, a), |b, i| {
             b.iter(|| black_box(i.0 + i.1))
