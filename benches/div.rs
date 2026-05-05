@@ -1,3 +1,5 @@
+#![feature(f128)]
+
 use criterion::{
     BenchmarkGroup, BenchmarkId, Criterion, criterion_group, criterion_main, measurement::WallTime,
 };
@@ -15,6 +17,21 @@ fn bench_f64(group: &mut BenchmarkGroup<'_, WallTime>, sample: usize, extra: boo
         let n = man as f64;
 
         group.bench_with_input(BenchmarkId::new("f64", iexp), &(n, d), |b, i| {
+            b.iter(|| black_box(i.0 / i.1))
+        });
+    }
+}
+
+// primitive f128
+fn bench_f128(group: &mut BenchmarkGroup<'_, WallTime>, sample: usize, extra: bool) {
+    let d = 10_f128.powi(8) + extra as u8 as f128;
+
+    for iexp in (0..=36).step_by(sample) {
+        let man = 10_i128.pow(iexp);
+
+        let n = man as f128;
+
+        group.bench_with_input(BenchmarkId::new("f128", iexp), &(n, d), |b, i| {
             b.iter(|| black_box(i.0 / i.1))
         });
     }
@@ -177,15 +194,17 @@ fn criterion_benchmark(c: &mut Criterion) {
     bench_rust_decimal(&mut group, sample, false);
     bench_decimax(&mut group, sample, false);
     bench_primitive_fixed_point_decimal(&mut group, sample, false);
+    bench_f128(&mut group, sample, false);
     bench_f64(&mut group, sample, false);
     group.finish();
 
     let mut group = c.benchmark_group(format!("division:non-evenly{machine}"));
-    // bench_bigdecimal(&mut group, sample, true);
+    bench_bigdecimal(&mut group, sample, true);
     bench_fastnum(&mut group, sample, true);
     bench_rust_decimal(&mut group, sample, true);
     bench_decimax(&mut group, sample, true);
     bench_primitive_fixed_point_decimal(&mut group, sample, true);
+    bench_f128(&mut group, sample, true);
     bench_f64(&mut group, sample, true);
     group.finish();
 }

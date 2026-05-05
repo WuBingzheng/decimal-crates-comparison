@@ -12,5 +12,7 @@ comparison_colors = [
     {r = 156, g = 102, b = 68}, # brown
     {r = 232, g = 140, b = 170},# pink
     {r = 64,  g = 105, b = 170},# deep blue
-    {r = 102, g = 186, b = 84}, # grass green
+    {r = 102, g = 180, b = 165},# teal
+    {r = 210, g = 110, b = 75}, # burnt orange
+    {r = 120, g = 120, b = 120},# neutral gray
 ]

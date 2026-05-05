@@ -1,3 +1,5 @@
+#![feature(f128)]
+
 use criterion::{
     BenchmarkGroup, BenchmarkId, Criterion, criterion_group, criterion_main, measurement::WallTime,
 };
@@ -13,6 +15,19 @@ fn bench_f64(group: &mut BenchmarkGroup<'_, WallTime>, sample: usize) {
         let a = man as f64;
 
         group.bench_with_input(BenchmarkId::new("f64", iexp), &(a, a), |b, i| {
+            b.iter(|| black_box(i.0 * i.1))
+        });
+    }
+}
+
+// primitive f128
+fn bench_f128(group: &mut BenchmarkGroup<'_, WallTime>, sample: usize) {
+    for iexp in (0..=36).step_by(sample) {
+        let man = 10_i128.pow(iexp);
+
+        let a = man as f128;
+
+        group.bench_with_input(BenchmarkId::new("f128", iexp), &(a, a), |b, i| {
             b.iter(|| black_box(i.0 * i.1))
         });
     }
@@ -180,12 +195,13 @@ fn criterion_benchmark(c: &mut Criterion) {
         .unwrap_or(1);
 
     let mut group = c.benchmark_group(format!("mulplication{machine}"));
-    // bench_bigdecimal(&mut group, sample);
-    // bench_fastnum(&mut group, sample);
+    bench_bigdecimal(&mut group, sample);
+    bench_fastnum(&mut group, sample);
     bench_rust_decimal(&mut group, sample);
     bench_decimax(&mut group, sample);
     bench_primitive_fixed_point_decimal(&mut group, sample);
     bench_f64(&mut group, sample);
+    bench_f128(&mut group, sample);
     group.finish();
 }
 
