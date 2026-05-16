@@ -1,10 +1,7 @@
-#![feature(f128)]
-
 use criterion::{
     BenchmarkGroup, BenchmarkId, Criterion, criterion_group, criterion_main, measurement::WallTime,
 };
 use std::env;
-use std::hint::black_box;
 use std::str::FromStr;
 
 // primitive f64
@@ -16,21 +13,7 @@ fn bench_f64(group: &mut BenchmarkGroup<'_, WallTime>, sample: usize, rescale: b
         let b = if rescale { a.powi(10) } else { a };
 
         group.bench_with_input(BenchmarkId::new("f64", iexp), &(a, b), |b, i| {
-            b.iter(|| black_box(i.0 + i.1))
-        });
-    }
-}
-
-// primitive f128
-fn bench_f128(group: &mut BenchmarkGroup<'_, WallTime>, sample: usize, rescale: bool) {
-    for iexp in (0..=36).step_by(sample) {
-        let man = 10_i128.pow(iexp);
-
-        let a = man as f128;
-        let b = if rescale { a.powi(10) } else { a };
-
-        group.bench_with_input(BenchmarkId::new("f128", iexp), &(a, b), |b, i| {
-            b.iter(|| black_box(i.0 + i.1))
+            b.iter(|| i.0 + i.1)
         });
     }
 }
@@ -48,7 +31,7 @@ fn bench_rust_decimal(group: &mut BenchmarkGroup<'_, WallTime>, sample: usize, r
         let b = Decimal::from_i128_with_scale(man, b_scale);
 
         group.bench_with_input(BenchmarkId::new("rust_decimal", iexp), &(a, b), |b, i| {
-            b.iter(|| black_box(i.0 + i.1))
+            b.iter(|| i.0 + i.1)
         });
     }
 }
@@ -66,7 +49,7 @@ fn bench_bigdecimal(group: &mut BenchmarkGroup<'_, WallTime>, sample: usize, res
         let b = BigDecimal::from_bigint(man, b_scale);
 
         group.bench_with_input(BenchmarkId::new("bigdecimal", iexp), &(a, b), |b, i| {
-            b.iter(|| black_box(&i.0 + &i.1))
+            b.iter(|| &i.0 + &i.1)
         });
     }
 }
@@ -84,7 +67,7 @@ fn bench_decimax(group: &mut BenchmarkGroup<'_, WallTime>, sample: usize, rescal
         let b = Dec128::from_parts(man, b_scale);
 
         group.bench_with_input(BenchmarkId::new("decimax:128", iexp), &(a, b), |b, i| {
-            b.iter(|| black_box(i.0 + i.1))
+            b.iter(|| i.0 + i.1)
         });
     }
 
@@ -95,7 +78,7 @@ fn bench_decimax(group: &mut BenchmarkGroup<'_, WallTime>, sample: usize, rescal
         let b = Dec64::from_parts(man, b_scale);
 
         group.bench_with_input(BenchmarkId::new("decimax:64", iexp), &(a, b), |b, i| {
-            b.iter(|| black_box(i.0 + i.1))
+            b.iter(|| i.0 + i.1)
         });
     }
 }
@@ -117,7 +100,7 @@ fn bench_fastnum(group: &mut BenchmarkGroup<'_, WallTime>, sample: usize, rescal
         let b = D128::from_parts(man, b_scale, Sign::Plus, Context::default());
 
         group.bench_with_input(BenchmarkId::new("fastnum:128", iexp), &(a, b), |b, i| {
-            b.iter(|| black_box(i.0 + i.1))
+            b.iter(|| i.0 + i.1)
         });
     }
 
@@ -128,7 +111,7 @@ fn bench_fastnum(group: &mut BenchmarkGroup<'_, WallTime>, sample: usize, rescal
         let b = D64::from_parts(man, b_scale, Sign::Plus, Context::default());
 
         group.bench_with_input(BenchmarkId::new("fastnum:64", iexp), &(a, b), |b, i| {
-            b.iter(|| black_box(i.0 + i.1))
+            b.iter(|| i.0 + i.1)
         });
     }
 }
@@ -145,7 +128,7 @@ fn bench_primitive_fixed_point_decimal(group: &mut BenchmarkGroup<'_, WallTime>,
         let a = Dec128::from_mantissa(man);
 
         group.bench_with_input(BenchmarkId::new("prim-fpdec:128", iexp), &(a, a), |b, i| {
-            b.iter(|| black_box(i.0 + i.1))
+            b.iter(|| i.0 + i.1)
         });
     }
 
@@ -155,7 +138,7 @@ fn bench_primitive_fixed_point_decimal(group: &mut BenchmarkGroup<'_, WallTime>,
         let a = Dec64::from_mantissa(man);
 
         group.bench_with_input(BenchmarkId::new("prim-fpdec:64", iexp), &(a, a), |b, i| {
-            b.iter(|| black_box(i.0 + i.1))
+            b.iter(|| i.0 + i.1)
         });
     }
 }
@@ -173,7 +156,6 @@ fn criterion_benchmark(c: &mut Criterion) {
     bench_rust_decimal(&mut group, sample, false);
     bench_decimax(&mut group, sample, false);
     bench_primitive_fixed_point_decimal(&mut group, sample);
-    bench_f128(&mut group, sample, false);
     bench_f64(&mut group, sample, false);
     group.finish();
 
@@ -182,7 +164,6 @@ fn criterion_benchmark(c: &mut Criterion) {
     bench_fastnum(&mut group, sample, true);
     bench_rust_decimal(&mut group, sample, true);
     bench_decimax(&mut group, sample, true);
-    bench_f128(&mut group, sample, true);
     bench_f64(&mut group, sample, true);
     group.finish();
 }

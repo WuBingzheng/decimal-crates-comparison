@@ -1,10 +1,7 @@
-#![feature(f128)]
-
 use criterion::{
     BenchmarkGroup, BenchmarkId, Criterion, criterion_group, criterion_main, measurement::WallTime,
 };
 use std::env;
-use std::hint::black_box;
 use std::str::FromStr;
 
 // primitive f64
@@ -15,20 +12,7 @@ fn bench_f64(group: &mut BenchmarkGroup<'_, WallTime>, sample: usize) {
         let a = man as f64;
 
         group.bench_with_input(BenchmarkId::new("f64", iexp), &(a, a), |b, i| {
-            b.iter(|| black_box(i.0 * i.1))
-        });
-    }
-}
-
-// primitive f128
-fn bench_f128(group: &mut BenchmarkGroup<'_, WallTime>, sample: usize) {
-    for iexp in (0..=36).step_by(sample) {
-        let man = 10_i128.pow(iexp);
-
-        let a = man as f128;
-
-        group.bench_with_input(BenchmarkId::new("f128", iexp), &(a, a), |b, i| {
-            b.iter(|| black_box(i.0 * i.1))
+            b.iter(|| i.0 * i.1)
         });
     }
 }
@@ -43,7 +27,7 @@ fn bench_rust_decimal(group: &mut BenchmarkGroup<'_, WallTime>, sample: usize) {
         let a = Decimal::from_i128_with_scale(man, iexp);
 
         group.bench_with_input(BenchmarkId::new("rust_decimal", iexp), &(a, a), |b, i| {
-            b.iter(|| black_box(i.0 * i.1))
+            b.iter(|| i.0 * i.1)
         });
     }
 }
@@ -59,7 +43,7 @@ fn bench_bigdecimal(group: &mut BenchmarkGroup<'_, WallTime>, sample: usize) {
         let b = a.clone();
 
         group.bench_with_input(BenchmarkId::new("bigdecimal", iexp), &(a, b), |b, i| {
-            b.iter(|| black_box(&i.0 * &i.1))
+            b.iter(|| &i.0 * &i.1)
         });
     }
 }
@@ -74,7 +58,7 @@ fn bench_decimax(group: &mut BenchmarkGroup<'_, WallTime>, sample: usize) {
         let a = Dec128::from_parts(man, iexp.min(31));
 
         group.bench_with_input(BenchmarkId::new("decimax:128", iexp), &(a, a), |b, i| {
-            b.iter(|| black_box(i.0 * i.1))
+            b.iter(|| i.0 * i.1)
         });
     }
 
@@ -84,7 +68,7 @@ fn bench_decimax(group: &mut BenchmarkGroup<'_, WallTime>, sample: usize) {
         let a = Dec64::from_parts(man, iexp.min(15));
 
         group.bench_with_input(BenchmarkId::new("decimax:64", iexp), &(a, a), |b, i| {
-            b.iter(|| black_box(i.0 * i.1))
+            b.iter(|| i.0 * i.1)
         });
     }
 }
@@ -104,7 +88,7 @@ fn bench_fastnum(group: &mut BenchmarkGroup<'_, WallTime>, sample: usize) {
         let b = a.clone();
 
         group.bench_with_input(BenchmarkId::new("fastnum:128", iexp), &(a, b), |b, i| {
-            b.iter(|| black_box(i.0 * i.1))
+            b.iter(|| i.0 * i.1)
         });
     }
 
@@ -115,7 +99,7 @@ fn bench_fastnum(group: &mut BenchmarkGroup<'_, WallTime>, sample: usize) {
         let b = a.clone();
 
         group.bench_with_input(BenchmarkId::new("fastnum:64", iexp), &(a, b), |b, i| {
-            b.iter(|| black_box(i.0 * i.1))
+            b.iter(|| i.0 * i.1)
         });
     }
 }
@@ -137,7 +121,7 @@ fn bench_primitive_fixed_point_decimal(group: &mut BenchmarkGroup<'_, WallTime>,
         group.bench_with_input(
             BenchmarkId::new("prim-const-fpdec:128", iexp),
             &(a, a),
-            |b, i| b.iter(|| black_box(i.0 * i.1)),
+            |b, i| b.iter(|| i.0 * i.1),
         );
     }
 
@@ -150,7 +134,7 @@ fn bench_primitive_fixed_point_decimal(group: &mut BenchmarkGroup<'_, WallTime>,
         group.bench_with_input(
             BenchmarkId::new("prim-const-fpdec:64", iexp),
             &(a, a),
-            |b, i| b.iter(|| black_box(i.0 * i.1)),
+            |b, i| b.iter(|| i.0 * i.1),
         );
     }
 
@@ -168,7 +152,7 @@ fn bench_primitive_fixed_point_decimal(group: &mut BenchmarkGroup<'_, WallTime>,
         group.bench_with_input(
             BenchmarkId::new("prim-oob-fpdec:128", iexp),
             &(a, a),
-            |b, i| b.iter(|| black_box(i.0.checked_mul(i.1, diff_scale))),
+            |b, i| b.iter(|| i.0.checked_mul(i.1, diff_scale)),
         );
     }
 
@@ -182,7 +166,7 @@ fn bench_primitive_fixed_point_decimal(group: &mut BenchmarkGroup<'_, WallTime>,
         group.bench_with_input(
             BenchmarkId::new("prim-oob-fpdec:64", iexp),
             &(a, a),
-            |b, i| b.iter(|| black_box(i.0.checked_mul(i.1, diff_scale))),
+            |b, i| b.iter(|| i.0.checked_mul(i.1, diff_scale)),
         );
     }
 }
@@ -194,14 +178,13 @@ fn criterion_benchmark(c: &mut Criterion) {
         .map(|s| usize::from_str(&s).expect("invalid SAMPLE"))
         .unwrap_or(1);
 
-    let mut group = c.benchmark_group(format!("mulplication{machine}"));
+    let mut group = c.benchmark_group(format!("multiplication{machine}"));
     bench_bigdecimal(&mut group, sample);
     bench_fastnum(&mut group, sample);
     bench_rust_decimal(&mut group, sample);
     bench_decimax(&mut group, sample);
     bench_primitive_fixed_point_decimal(&mut group, sample);
     bench_f64(&mut group, sample);
-    bench_f128(&mut group, sample);
     group.finish();
 }
 
